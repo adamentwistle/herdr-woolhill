@@ -1,0 +1,8 @@
+name = "woolhill-board"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+
+# Make one with `wrangler kv namespace create BOARD` and put its id here.
+[[kv_namespaces]]
+binding = "BOARD"
+id = "replace-with-your-kv-id"
