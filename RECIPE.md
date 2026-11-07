@@ -17,7 +17,7 @@ An idle game along the bottom of the window. Your agents are a flock on a pixel-
 - **The loft** of the barn, a `#fff0a8` window with a faint halo, over the shade from dusk on.
 - **The sign:** top right, 10px in, `#33242fd8`, radius 4, the wool to spend in `#fff0a8`, 16px pixel font.
 
-**The overlay**, 860 by 640 on `popover`, 18px padding. A header holds the name in 24px pixel font, a `Demo data` tag in demo mode, the pages as 30px tabs, and at the right a tuft and the wool. If the shown layout has no strip, a button reads `Add the hill to this window`.
+**The overlay**, 860 by 640 on `popover`, 18px padding. A header holds the name in 24px pixel font, a `Demo data` tag in demo mode, the pages as 30px tabs, and at the right a tuft and the wool. A button reads `Pin to bottom strip`, or `Unpin from bottom strip` while the strip shows, in the shop's own `raised` style.
 
 - **Shop:** Hill, Sheep and Seasons, in cards 196 by 66 on `canvas`, a picture beside the name and either `Owned` or a `solid` button reading `Buy 150`, dim if it costs too much. A later tier shows once the one before it is owned. An owned season has `Use`, and the one on has an `accent` border and reads `In use`.
 - **Flock:** lifetime wool and wool to spend in 40px amber pixel font, then wolves driven off, longest run, turns finished and most sheep at once in 24px, then the hill as bought with one sheep of each breed.
@@ -41,7 +41,7 @@ A note under the page, 12px `muted`, or `blocked` if something failed. Colours i
 - **The dog**, once bought, sits at the right, and trots to stand by a sheep with a wolf.
 - **Press** a sheep or a wolf to jump to its agent. Hover shows its tab's name, or its space's if nobody named the tab. Press the sign to open the overlay.
 - **Breeds:** cream comes with the hill. Each sheep's breed comes from a hash of its address over the breeds owned, so buying one turns part of the flock.
-- **Keys:** `ctrl-shift-h` opens and closes the overlay. `woolhill.shop`, `.flock`, `.share`, `.board`, `.save`, `.copy` and `.place` can be bound, and reach the open overlay. Esc closes it.
+- **Keys:** `ctrl-shift-h` opens and closes the overlay. `woolhill.shop`, `.flock`, `.share`, `.board`, `.save`, `.copy` and `.pin` can be bound, and reach the open overlay. Esc closes it.
 - **After a restart:** a run still open counts only if its agent is still at it, because nobody saw when it stopped.
 - **Leaderboard:** with `LEADERBOARD_URL` empty the page doesn't exist. With it set, nothing is read or sent until the person turns it on. A score goes only after they pick a nickname and press `Send`.
 
@@ -49,8 +49,8 @@ A note under the page, 12px `muted`, or `blocked` if something failed. Colours i
 
 - **One mod, two roles.** `mods/woolhill`, with `{ "place": "bottom", "size": 144, "title": "Woolhill", "overlay": { "width": 860, "height": 640 } }`. A copy with `props().overlay` is the overlay and only the strip earns.
 - **The block:** `{ "id": "woolhill", "type": "block", "size": { "px": 144 }, "min": 96, "max": 320, "content": { "mod": "woolhill" } }`, in the column that holds the terminals, right after the child holding the `tab` block. Props: `demo`, `hour`, `season`.
-- **Files:** `game.js` rules, shop and save. `flock.js` who is where, as a start, a target and a length. `world.js` sky and placing. `scene.js` the strip. `shop.js` the overlay. `card.js` the PNG. `board.js` and `config.js` the leaderboard client. `place.js` adding the block. `demo.js` made-up data. `cardart.js`, `art/` and `fonts/` are written by `art/build.mjs`.
-- **`herdr`:** `agents()`, `shared` and `setShared` (`woolhill.state`, `woolhill.demo`), `run` (`pane.focus`, `agent.focus`, `mod.open`, `layout.clone`, `layout.set`), `layout()`, `settings().dark` and `.zoom`, `window().platform`, `nextCommand()`, `exec`, `closeOverlay`, `appHome()`, `home()`, `theme()`, `props()`. From `fs/promises`: `mkdir`, `writeFile`, `unlink`. `cx.write_to_clipboard` for the line, `fetch` for the board.
+- **Files:** `game.js` rules, shop and save. `flock.js` who is where, as a start, a target and a length. `world.js` sky and placing. `scene.js` the strip. `shop.js` the overlay. `card.js` the PNG. `board.js` and `config.js` the leaderboard client. `place.js` pinning and unpinning the block. `demo.js` made-up data. `cardart.js`, `art/` and `fonts/` are written by `art/build.mjs`.
+- **`herdr`:** `agents()`, `shared` and `setShared` (`woolhill.state`, `woolhill.demo`), `run` (`pane.focus`, `agent.focus`, `mod.open`, `layout.show`, `layout.hide`, `layout.set`), `layout()`, `settings().dark` and `.zoom`, `window().platform`, `nextCommand()`, `exec`, `closeOverlay`, `appHome()`, `home()`, `theme()`, `props()`. From `fs/promises`: `mkdir`, `writeFile`, `unlink`. `cx.write_to_clipboard` for the line, `fetch` for the board.
 - **Motion:** `.transition("left")` with a linear length walks, `.transition("top")` hops, and animated GIFs from `image()` do the legs and the grazing. Those GIFs and transitions run in the app, not in the script.
 - **Programs:** `certutil` on Windows, `base64` on macOS, `sh` with `base64` elsewhere. Only for the card.
 - **Art:** made in the repo. `art/sprites.mjs` holds every sprite as text, one character a pixel, with sheep and wolves stamped from parts so frames match. `art/hills.mjs` draws the hills, `art/font.mjs` turns the bitmap font into a TrueType file, and `art/encode.mjs` writes PNG and GIF. Generated art wasn't used.
@@ -58,7 +58,7 @@ A note under the page, 12px `muted`, or `blocked` if something failed. Colours i
 
 ## Watch out
 
-- **Herdr 0.1.13 didn't dock this mod.** With `"place": "bottom"` it started and opened as an overlay, but no block appeared in a shipped layout, and shipped layouts can't take structure. So the overlay offers the button, which clones a shipped layout, adds the block and calls `layout.set`. An agent adding this mod can do the same by hand. Earlier reports had the app dock a bottom mod as a right-hand column when the root is a row.
+- **Herdr 0.1.13 didn't dock this mod.** With `"place": "bottom"` it started and opened as an overlay, but no block appeared in a shipped layout, and shipped layouts can't take structure. So the overlay offers Pin to bottom strip. Where the shown layout has a woolhill block it runs `layout.show` or `layout.hide` on it, and on its hidden parents. Where it has none and the layout is the person's own, it adds the block with `layout.set`, and Unpin then hides it. Where it has none and the layout is shipped, the button isn't shown, because a shipped layout won't take it. The state comes from `layout()` on every render, never from memory. Earlier reports had the app dock a bottom mod as a right-hand column when the root is a row.
 - **`fs.writeFile` with a Uint8Array writes an empty file and reports success** on Herdr 0.1.13 on Windows, even with bytes from `fs.readFile`. A string works, and writes are refused outside the app's folder. So the card is written as base64 text and `certutil` or `base64` makes the PNG, straight into `data/woolhill` or `~/Downloads`. Check a file's size, not that the call passed.
 - **Zoom.** `on_size_change` reports window pixels, while `.w()`, `.left()` and text are the app's own, scaled by `settings().zoom`. So the strip keeps the size as reported and divides by the zoom when it draws, and a zoom change needs no new report. Without that, at Herdr's default of 1.2 the hill falls off the bottom and the flock walks off the right. When the width shrinks, whatever is past the edge comes back to it.
 - **The overlay can't fit itself.** It's 860 by 640 in the app's units, so 1032 by 768 at zoom 1.2 and 1290 by 960 at 1.5. In a smaller window Herdr centres it and cuts it off, header and all. A mod can't read the window's size and `mod.open` takes none. Esc still closes it, and the `woolhill.*` keys still change page.
@@ -77,7 +77,7 @@ A note under the page, 12px `muted`, or `blocked` if something failed. Colours i
 
 - `herdr-app check mods/woolhill` passes, and `node --test` passes.
 - At zooms 1.0, 1.1, 1.2 and 1.5 the strip fills its block, with the hill on the floor and the sign inside the window.
-- In `main`, the overlay's button makes `main-woolhill` with the block between the terminals and the status bar.
+- In a person's own layout with no strip, Pin to bottom strip adds the block between the terminals and the status bar, and Unpin hides it. In a layout with the block, they show and hide it. In a shipped layout with no block, there's no button.
 - With demo props, the strip shows walking, grazing, alert, sleeping, resting and hopping sheep, a standing wolf and a walking one, a tuft, the dog and everything bought, and nothing is written to `woolhill.state`.
 - With a stand-in agent reporting OSC 7501 `state=working:app=claude-code`, a sheep appears. `blocked` brings a wolf. `working` sends it off and adds one to wolves driven off. `idle` pays wool.
 - Buying takes wool and the thing appears on the hill. The save survives a restart.

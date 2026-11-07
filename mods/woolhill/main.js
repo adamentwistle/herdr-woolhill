@@ -3,14 +3,14 @@
 import { View } from "gpui-kit";
 import { InputState } from "gpui-base";
 import * as fs from "fs/promises";
-import { agents, appHome, closeOverlay, exec, home, layout, nextCommand, props, run, setShared, settings, shared, theme, window as appWindow } from "herdr";
+import { agents, appHome, exec, home, layout, nextCommand, props, run, setShared, settings, shared, theme, window as appWindow } from "herdr";
 import { boardReady, sendScore, topScores } from "./board.js";
 import { decodeCommand, makeCard } from "./card.js";
 import { LEADERBOARD_URL } from "./config.js";
 import { DEMO_KEY, STATE_KEY, breedOf, breedsOwned, brag, buy, cleanNick, fresh, observe, owns, readState, settle, useSeason } from "./game.js";
 import { DEMO_SPOTS, demoAgents, demoBoard, demoState } from "./demo.js";
 import { REST_MS, SHEEP_W, TICK_MS, fit, land, moving, newFlock, step } from "./flock.js";
-import { SHIPPED, hasStrip, withStrip } from "./place.js";
+import { pinPlan } from "./place.js";
 import { stripView } from "./scene.js";
 import { overlayView } from "./shop.js";
 import { appSize } from "./world.js";
@@ -163,7 +163,7 @@ export default class Woolhill extends View {
     cx.spawn(async (cx) => {
       while (!this.closed) {
         const command = await nextCommand();
-        if (command === "place") this.placeStrip(cx);
+        if (command === "pin" || command === "place") this.pin(cx);
         else if (command === "save") this.saveCard(cx);
         else if (command === "copy") this.copyLine(cx);
         else if (PAGES.includes(command) && (command !== "board" || this.boardShown())) this.goTo(command, cx);
@@ -183,8 +183,9 @@ export default class Woolhill extends View {
     return Boolean(cleanNick(this.state().nick));
   }
 
-  needsStrip() {
-    return !this.demo && !hasStrip(layout());
+  // Read live on every render, so a hide from anywhere else shows here too.
+  pinning() {
+    return pinPlan(layout(), shared("layout"));
   }
 
   goTo(page, cx) {
@@ -312,18 +313,11 @@ export default class Woolhill extends View {
     });
   }
 
-  // A shipped layout can't change, so this clones it first, as Herdr's own Duplicate does.
-  placeStrip(cx) {
-    const name = String(shared("layout") ?? "main");
-    if (SHIPPED.includes(name)) run("layout.clone", { name, as: `${name}-woolhill` });
-    const tree = withStrip(layout());
-    if (tree) {
-      run("layout.set", { layout: tree });
-      closeOverlay(this.overlay);
-    } else {
-      this.note = { text: "This layout has no terminals to put the hill under.", bad: true };
-      cx.notify();
-    }
+  pin(cx) {
+    const plan = this.pinning();
+    if (!plan) return;
+    for (const [name, args] of plan.commands) run(name, args);
+    cx.notify();
   }
 
   render(cx) {
