@@ -130,7 +130,7 @@ function header(view, t) {
     .when(view.demo, (el) => el.child(div().px(6).py(2).rounded(4).bg(t.raised).text_size(11).text_color(t.dim).child("Demo data")))
     .child(h_flex().gap(2).children(pages.map(([id, words]) => tab(id, words, view, t))))
     .child(div().flex_1())
-    .when(view.needsStrip(), (el) => el.child(button("place-strip", "Add the hill to this window", true, t, (_e, cx) => view.placeStrip(cx))))
+    .when(Boolean(view.pinning()), (el) => el.child(button("pin", view.pinning().pinned ? "Unpin from bottom strip" : "Pin to bottom strip", true, t, (_e, cx) => view.pin(cx))))
     .child(h_flex().gap(6).items_center().child(image(art("tuft")).w(27).h(21)).child(div().font_family(PIXEL_FONT).text_size(24).text_color(amber(view)).child(count(s.wool))));
 }
 

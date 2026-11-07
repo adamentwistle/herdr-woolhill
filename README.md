@@ -6,7 +6,7 @@ An idle game for Herdr. Your agents are a flock on a hillside along the bottom o
 
 A mod for the [Herdr](https://github.com/ogulcancelik/herdr) desktop app, with art drawn pixel by pixel in this repo. It runs on the mod API alone, with no helper program, and was run in real Herdr 0.1.13 windows on Windows and on a Mac, at zooms from 1.0 to 1.5. It hasn't been run on Linux.
 
-Ask your agent to add it from [herdr.dev/mods](https://herdr.dev/gallery/?type=mods), or point it at this repo. It reads [the recipe](RECIPE.md) and every file first. By hand, copy `mods/woolhill` into `~/.config/herdr-app/mods`, merge `keys.json` into yours and restart Herdr so the pixel font loads. `ctrl-shift-h` opens the overlay. Herdr doesn't add a new mod to a shipped layout, so press **Add the hill to this window** there. On a shipped layout that makes a copy called `<layout>-woolhill` and switches to it.
+Ask your agent to add it from [herdr.dev/mods](https://herdr.dev/gallery/?type=mods), or point it at this repo. It reads [the recipe](RECIPE.md) and every file first. By hand, copy `mods/woolhill` into `~/.config/herdr-app/mods`, merge `keys.json` into yours and restart Herdr so the pixel font loads. `ctrl-shift-h` opens the overlay. The overlay has **Pin to bottom strip**, which puts the hill under the terminals at 144px, and then reads **Unpin from bottom strip**, which hides it again. It reads the shown layout each time, so it's right after a hide from anywhere else. Herdr doesn't add a new mod to a shipped layout and won't take new blocks there, so on `main`, `terminals` and `win98` the button only shows if the layout already has the block. Duplicate the layout first to pin it there.
 
 ## How it plays
 

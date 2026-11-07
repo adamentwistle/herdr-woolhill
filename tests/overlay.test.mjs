@@ -10,7 +10,7 @@ const { DEMO_KEY, STATE_KEY, CATALOG, fresh } = await import("../mods/woolhill/g
 const { REST_MS, TICK_MS } = await import("../mods/woolhill/flock.js");
 const { CARD_H, CARD_W, decodeCommand, makeCard, toBase64 } = await import("../mods/woolhill/card.js");
 const { demoAgents, demoState } = await import("../mods/woolhill/demo.js");
-const { hasStrip, withStrip } = await import("../mods/woolhill/place.js");
+const { hasStrip, pinPlan, withStrip } = await import("../mods/woolhill/place.js");
 const { boardBody, boardReady, sendScore, topScores } = await import("../mods/woolhill/board.js");
 const { LEADERBOARD_URL } = await import("../mods/woolhill/config.js");
 const { bodyAt, phaseAt, propsOn, skyFor } = await import("../mods/woolhill/world.js");
@@ -350,24 +350,54 @@ test("a layout with no terminal column can't take the strip", () => {
   assert.equal(withStrip({ type: "row", children: [{ type: "block", content: { tab: "active" } }] }), null);
 });
 
-test("Add the hill shows only when it's missing, and clones a shipped layout", async () => {
-  world.tree = { type: "column", children: [{ type: "block", content: { tab: "active" } }] };
+const withHill = (hidden) => ({ type: "column", children: [{ id: "top", type: "block", content: { tab: "active" } }, { id: "w1", type: "block", content: { mod: "woolhill" }, ...(hidden ? { hidden: true } : {}) }] });
+
+test("a shown strip is hidden by Unpin, and shown again by Pin", async () => {
+  world.layoutName = "main";
+  world.tree = withHill(false);
   const { cx, tree } = await open({ overlay: "o1" });
-  await press(tree, "place-strip", cx);
-  assert.deepEqual(world.ran[0], { name: "layout.clone", args: { name: "main", as: "main-woolhill" } });
-  assert.equal(world.ran[1].name, "layout.set");
-  assert.equal(hasStrip(world.ran[1].args.layout), true);
-  assert.deepEqual(world.closed, ["o1"]);
-  world.tree = world.ran[1].args.layout;
-  assert.equal(tree().find("place-strip"), null);
+  assert.equal(tree().find("pin").text(), "Unpin from bottom strip");
+  await press(tree, "pin", cx);
+  assert.deepEqual(world.ran, [{ name: "layout.hide", args: { id: "w1" } }]);
+  world.tree = withHill(true);
+  assert.equal(tree().find("pin").text(), "Pin to bottom strip");
+  await press(tree, "pin", cx);
+  assert.deepEqual(world.ran[1], { name: "layout.show", args: { id: "w1" } });
+  assert.deepEqual(world.closed, []);
 });
 
-test("a person's own layout is changed in place", async () => {
+test("a person's own layout with no strip gets one under the terminals, 144px tall", async () => {
   world.layoutName = "mine";
-  world.tree = { type: "column", children: [{ type: "block", content: { tab: "active" } }] };
+  world.tree = { type: "column", children: [{ id: "top", type: "block", content: { tab: "active" } }] };
   const { cx, tree } = await open({ overlay: "o1" });
-  await press(tree, "place-strip", cx);
+  assert.equal(tree().find("pin").text(), "Pin to bottom strip");
+  await press(tree, "pin", cx);
   assert.equal(world.ran[0].name, "layout.set");
+  const strip = world.ran[0].args.layout.children[1];
+  assert.deepEqual([strip.id, strip.size.px, strip.content.mod], ["woolhill", 144, "woolhill"]);
+  assert.equal(world.tree.children.length, 1);
+});
+
+test("a shipped layout with no strip shows no pin button", async () => {
+  world.layoutName = "main";
+  world.tree = { type: "column", children: [{ type: "block", content: { tab: "active" } }] };
+  const { tree } = await open({ overlay: "o1" });
+  assert.equal(tree().find("pin"), null);
+});
+
+test("a new strip's id doesn't take one in use, and a hidden column around it is shown too", () => {
+  const tree = { type: "column", children: [{ id: "woolhill", type: "block", content: { tab: "active" } }] };
+  assert.equal(withStrip(tree).children[1].id, "woolhill-2");
+  const wrapped = { type: "row", children: [{ id: "wrap", type: "column", hidden: true, children: [{ id: "w1", type: "block", content: { mod: "woolhill" } }] }] };
+  assert.deepEqual(pinPlan(wrapped, "main").commands, [["layout.show", { id: "wrap" }]]);
+});
+
+test("woolhill.pin presses it from a key", async () => {
+  world.layoutName = "main";
+  world.tree = withHill(true);
+  world.commands = ["pin"];
+  await open({ overlay: "o1" });
+  assert.deepEqual(world.ran, [{ name: "layout.show", args: { id: "w1" } }]);
 });
 
 test("the day follows the clock", () => {
