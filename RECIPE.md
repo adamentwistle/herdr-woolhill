@@ -2,7 +2,7 @@
 
 An idle game along the bottom of the window. Your agents are a flock on a pixel-art hillside, drawn from live agent state. Working sheep graze and walk, idle ones rest, and a finished one hops and drops wool. A blocked agent draws a wolf toward its sheep, closer the longer it waits, and answering drives it off. No sheep is ever lost. Wool buys fences, trees, a pond, a dog, a barn, breeds of sheep and seasons, and the sky follows the real clock.
 
-![Woolhill](preview.png)
+![The Woolhill strip along the bottom of a Herdr window, with the flock out on the hill](preview.png)
 
 ## What you see
 
