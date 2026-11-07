@@ -2,7 +2,7 @@
 
 An idle game for Herdr. Your agents are a flock on a hillside along the bottom of the window. Working sheep graze and walk, idle ones rest, and finished ones hop and drop wool. A blocked agent draws a wolf. Spend the wool on the hill.
 
-![Woolhill](preview.png)
+![The Woolhill strip along the bottom of a Herdr window, with the flock out on the hill](preview.png)
 
 A mod for the [Herdr](https://github.com/ogulcancelik/herdr) desktop app, with art drawn pixel by pixel in this repo. It runs on the mod API alone, with no helper program, and was run in real Herdr 0.1.13 windows on Windows and on a Mac, at zooms from 1.0 to 1.5. It hasn't been run on Linux.
 
